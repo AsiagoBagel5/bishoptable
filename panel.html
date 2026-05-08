@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MFG Pipeline</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap');
+:root{--bg:#000;--surf:#111;--surf2:#1e1e1e;--acc:#888;--text:#fff;--muted:#666;--border:#2a2a2a;--green:#4caf7d;--red:#e05555;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh;}
+.header{background:var(--surf);border-bottom:2px solid var(--acc);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.header-left{display:flex;align-items:center;gap:12px;}
+.header-logo-img{width:44px;height:44px;border-radius:8px;object-fit:contain;display:none;}
+.header-logo-ph{width:44px;height:44px;border-radius:8px;background:var(--surf2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:18px;color:var(--acc);flex-shrink:0;}
+.header-title{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;letter-spacing:.08em;color:var(--acc);text-transform:uppercase;line-height:1;}
+.header-team{font-size:13px;color:var(--muted);font-weight:500;}
+.icon-btn{background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:4px 7px;border-radius:4px;transition:color .15s;line-height:1;}
+.icon-btn:hover{color:var(--acc);}
+.form-body{padding:14px 16px 90px;display:flex;flex-direction:column;gap:20px;}
+.field-label{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;letter-spacing:.1em;color:var(--acc);text-transform:uppercase;margin-bottom:8px;}
+.field-sublabel{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.field-input{width:100%;background:var(--surf2);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .15s;}
+.field-input:focus{border-color:var(--acc);}
+.field-input::placeholder{color:var(--muted);}
+textarea.field-input{resize:vertical;min-height:60px;line-height:1.5;}
+.field-select{width:100%;background:var(--surf2);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;cursor:pointer;transition:border-color .15s;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;}
+.field-select:focus{border-color:var(--acc);}
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.pill-group{display:flex;flex-wrap:wrap;gap:7px;}
+.pill{background:var(--surf2);border:1px solid var(--border);color:var(--text);padding:6px 14px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;user-select:none;white-space:nowrap;}
+.pill:hover{border-color:var(--acc);color:var(--acc);}
+.pill.active{background:var(--acc);border-color:var(--acc);color:var(--bg);font-weight:600;}
+.sub-pill{background:var(--surf2);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;user-select:none;white-space:nowrap;display:inline-flex;align-items:center;gap:7px;}
+.sub-pill:hover{border-color:var(--acc);color:var(--acc);}
+.sub-pill.active{background:var(--acc);border-color:var(--acc);color:var(--bg);font-weight:600;}
+.sub-code{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:11px;background:rgba(255,255,255,.12);padding:1px 5px;border-radius:3px;}
+.sub-pill.active .sub-code{background:rgba(0,0,0,.2);}
+.pn-preview{background:var(--surf2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;}
+.pn-value{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:var(--acc);letter-spacing:.08em;}
+.pn-status{font-size:12px;color:var(--muted);}
+.mat-section{background:var(--surf2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:8px;}
+.mat-section:last-of-type{margin-bottom:0;}
+.mat-hd{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background .15s;user-select:none;}
+.mat-hd:hover{background:rgba(255,255,255,.03);}
+.mat-hd.open{border-bottom:1px solid var(--border);}
+.mat-hd-title{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:14px;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:10px;}
+.mat-badge{font-size:11px;color:var(--green);font-weight:600;background:rgba(76,175,125,.12);padding:2px 8px;border-radius:10px;display:none;}
+.mat-arrow{font-size:10px;color:var(--muted);transition:transform .2s;}
+.mat-body{display:none;padding:14px;flex-direction:column;gap:12px;}
+.mat-body.open{display:flex;}
+.thickness-pills{display:flex;flex-wrap:wrap;gap:6px;}
+.t-pill{background:var(--surf);border:1px solid var(--border);color:var(--text);padding:5px 12px;border-radius:14px;font-size:13px;cursor:pointer;transition:all .15s;user-select:none;}
+.t-pill:hover{border-color:var(--acc);color:var(--acc);}
+.t-pill.active{background:var(--acc);border-color:var(--acc);color:var(--bg);font-weight:600;}
+.mat-summary{background:var(--surf2);border:1px solid var(--green);border-radius:8px;padding:10px 14px;display:none;}
+.mat-summary-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;}
+.mat-summary-value{font-size:14px;font-weight:600;color:var(--green);}
+.file-drop{border:2px dashed var(--border);border-radius:8px;padding:16px;text-align:center;cursor:pointer;transition:border-color .15s;position:relative;}
+.file-drop:hover{border-color:var(--acc);}
+.file-drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.file-drop-text{font-size:13px;color:var(--muted);}
+.file-drop-text span{color:var(--acc);}
+.file-info{font-size:12px;color:var(--green);margin-top:7px;display:none;}
+.file-clear{background:none;border:none;color:var(--red);font-size:12px;cursor:pointer;margin-top:5px;display:none;}
+.print-header{background:var(--surf2);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.print-title{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:18px;text-transform:uppercase;letter-spacing:.06em;color:var(--acc);margin-bottom:3px;}
+.print-sub{font-size:13px;color:var(--muted);}
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surf);border-top:1px solid var(--border);padding:12px 16px;display:flex;gap:10px;z-index:100;}
+.btn-secondary{flex:0 0 auto;background:transparent;border:1px solid var(--border);color:var(--muted);padding:10px 18px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;}
+.btn-secondary:hover{border-color:var(--muted);color:var(--text);}
+.btn-primary{flex:1;background:var(--acc);border:none;color:var(--bg);padding:10px;border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;letter-spacing:.06em;cursor:pointer;transition:filter .15s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.btn-primary:hover{filter:brightness(1.1);}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;}
+.toast{position:fixed;top:80px;left:16px;right:16px;background:var(--green);color:#fff;padding:12px 16px;border-radius:8px;font-weight:600;font-size:14px;transform:translateY(-100px);opacity:0;transition:all .3s;z-index:300;pointer-events:none;}
+.toast.error{background:var(--red);}
+.toast.show{transform:translateY(0);opacity:1;}
+.screen{display:none;}
+.screen.active{display:block;}
+.settings-wrap{display:flex;flex-direction:column;height:calc(100vh - 74px);}
+.tab-nav{display:flex;background:var(--surf);border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;}
+.tab-btn{flex:1;min-width:48px;padding:10px 3px;background:none;border:none;color:var(--muted);font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;}
+.tab-btn:hover{color:var(--text);}
+.tab-btn.active{color:var(--acc);border-bottom-color:var(--acc);}
+.tab-pane{display:none;flex:1;overflow-y:auto;padding:16px;flex-direction:column;gap:14px;}
+.tab-pane.active{display:flex;}
+.s-section{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:.08em;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.s-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;}
+.s-input{width:100%;background:var(--surf2);border:1px solid var(--border);color:var(--text);padding:9px 11px;border-radius:8px;font-size:13px;outline:none;font-family:'DM Sans',sans-serif;transition:border-color .15s;}
+.s-input:focus{border-color:var(--acc);}
+.s-input::placeholder{color:var(--muted);}
+.s-desc{font-size:12px;color:var(--muted);line-height:1.6;}
+.divider{height:1px;background:var(--border);flex-shrink:0;}
+.list-manager{display:flex;flex-direction:column;gap:6px;}
+.list-item{display:flex;align-items:center;gap:10px;background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;}
+.list-item-code{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;color:var(--acc);min-width:32px;}
+.list-item-name{flex:1;font-size:13px;}
+.list-item-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;padding:0 2px;transition:color .15s;}
+.list-item-del:hover{color:var(--red);}
+.list-add-row{display:flex;gap:7px;}
+.list-add-code{width:64px;background:var(--surf2);border:1px solid var(--border);color:var(--text);padding:9px 10px;border-radius:8px;font-size:13px;font-family:'Rajdhani',sans-serif;font-weight:700;outline:none;text-transform:uppercase;}
+.list-add-code:focus{border-color:var(--acc);}
+.list-add-input{flex:1;background:var(--surf2);border:1px solid var(--border);color:var(--text);padding:9px 11px;border-radius:8px;font-size:13px;outline:none;font-family:'DM Sans',sans-serif;}
+.list-add-input:focus{border-color:var(--acc);}
+.list-add-btn{background:var(--acc);border:none;color:var(--bg);padding:9px 14px;border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:filter .15s;}
+.list-add-btn:hover{filter:brightness(1.1);}
+.list-empty{font-size:12px;color:var(--muted);text-align:center;padding:12px;}
+.pn-example-box{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;}
+.pn-example-val{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:var(--acc);letter-spacing:.1em;}
+.pn-example-lbl{font-size:11px;color:var(--muted);margin-top:3px;}
+.mode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.mode-card{border:2px solid var(--border);border-radius:10px;padding:10px 6px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;transition:border-color .15s;background:var(--surf2);}
+.mode-card:hover{border-color:var(--muted);}
+.mode-card.active{border-color:var(--acc);}
+.mode-preview{width:50px;height:36px;border-radius:5px;overflow:hidden;display:flex;flex-direction:column;border:1px solid var(--border);}
+.mpv-hd{height:9px;flex-shrink:0;}
+.mpv-body{flex:1;display:flex;gap:2px;padding:2px;}
+.mpv-card{flex:1;border-radius:2px;}
+.mode-name{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;color:var(--text);letter-spacing:.05em;text-transform:uppercase;}
+.mode-check{width:15px;height:15px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--bg);}
+.mode-card.active .mode-check{background:var(--acc);border-color:var(--acc);}
+.custom-opts{display:none;flex-direction:column;gap:10px;padding:12px;background:var(--surf2);border-radius:8px;border:1px solid var(--border);}
+.custom-opts.visible{display:flex;}
+.color-row{display:flex;align-items:center;gap:10px;}
+.color-swatch{width:32px;height:32px;border-radius:6px;border:1px solid var(--border);overflow:hidden;position:relative;cursor:pointer;flex-shrink:0;}
+.color-swatch input[type=color]{position:absolute;inset:-4px;width:calc(100% + 8px);height:calc(100% + 8px);border:none;cursor:pointer;opacity:0;}
+.cp{position:absolute;inset:0;border-radius:5px;pointer-events:none;}
+.color-info{flex:1;}
+.color-lbl{font-size:12px;font-weight:600;color:var(--text);margin-bottom:1px;}
+.color-sub{font-size:11px;color:var(--muted);}
+.hex-in{font-size:11px;font-family:monospace;color:var(--text);background:var(--surf);border:1px solid var(--border);padding:4px 7px;border-radius:5px;width:70px;outline:none;}
+.hex-in:focus{border-color:var(--acc);}
+.logo-drop{border:2px dashed var(--border);border-radius:8px;padding:14px;text-align:center;cursor:pointer;transition:border-color .15s;}
+.logo-drop:hover{border-color:var(--acc);}
+.logo-prev{width:52px;height:52px;object-fit:contain;border-radius:6px;display:none;margin:0 auto 6px;}
+.logo-hint{font-size:12px;color:var(--muted);}
+.save-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surf);border-top:1px solid var(--border);padding:12px 16px;display:flex;gap:10px;z-index:50;}
+.btn-save{flex:1;background:var(--acc);border:none;color:var(--bg);padding:10px;border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;letter-spacing:.06em;cursor:pointer;transition:filter .15s;}
+.btn-save:hover{filter:brightness(1.1);}
+.btn-back{background:none;border:1px solid var(--border);color:var(--muted);padding:10px 16px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;}
+.btn-back:hover{color:var(--text);border-color:var(--muted);}
+.spinner{width:15px;height:15px;border:2px solid rgba(0,0,0,.2);border-top-color:var(--bg);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
+.spinner-sm{width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--muted);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+<div class="header">
+  <div class="header-left">
+    <img class="header-logo-img" id="hLogoImg" alt="" />
+    <div class="header-logo-ph" id="hLogoPh">?</div>
+    <div>
+      <div class="header-title" id="hTitle">MFG Pipeline</div>
+      <div class="header-team" id="hTeam">FRC</div>
+    </div>
+  </div>
+  <button class="icon-btn" onclick="showScreen('settings')" title="Settings">&#9881;</button>
+</div>
+
+<!-- SETTINGS -->
+<div class="screen" id="settingsScreen">
+  <div class="settings-wrap">
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="switchTab('connection',this)">Connect</button>
+      <button class="tab-btn" onclick="switchTab('season',this)">Season</button>
+      <button class="tab-btn" onclick="switchTab('subsystems',this)">Systems</button>
+      <button class="tab-btn" onclick="switchTab('machines',this)">Machines</button>
+      <button class="tab-btn" onclick="switchTab('versions',this)">Robots</button>
+      <button class="tab-btn" onclick="switchTab('filaments',this)">Filaments</button>
+      <button class="tab-btn" onclick="switchTab('branding',this)">Brand</button>
+      <button class="tab-btn" onclick="switchTab('appearance',this)">Theme</button>
+    </div>
+    <div class="tab-pane active" id="tab-connection">
+      <div class="s-section">Supabase</div>
+      <div class="s-desc">Find these under Settings &rarr; API in your Supabase project.</div>
+      <div><div class="s-label">Project URL</div><input class="s-input" id="cfgUrl" placeholder="https://xxxx.supabase.co" /></div>
+      <div><div class="s-label">Anon / Public Key</div><input class="s-input" id="cfgKey" type="password" placeholder="eyJhbGci..." /></div>
+      <div><div class="s-label">Table Name</div><input class="s-input" id="cfgTable" placeholder="mfg_pipeline" /></div>
+      <div><div class="s-label">Storage Bucket</div><input class="s-input" id="cfgBucket" placeholder="mfg-files" /></div>
+    </div>
+    <div class="tab-pane" id="tab-season">
+      <div class="s-section">Part Number Format</div>
+      <div class="s-desc">Team number and year set here. Bot version letter comes from the selected Robot Version.</div>
+      <div><div class="s-label">Team Number</div><input class="s-input" id="cfgTeamNum" placeholder="6328" oninput="updatePNPreview()" /></div>
+      <div><div class="s-label">Year (2 digits)</div><input class="s-input" id="cfgYear" placeholder="26" maxlength="2" oninput="updatePNPreview()" /></div>
+      <div class="pn-example-box">
+        <div class="pn-example-val" id="pnExample">????-??X-S-01</div>
+        <div class="pn-example-lbl">X = Robot version code &nbsp;|&nbsp; S = Subsystem code</div>
+      </div>
+    </div>
+    <div class="tab-pane" id="tab-subsystems">
+      <div class="s-section">Subsystems</div>
+      <div class="s-desc">Code used in part number (e.g. "I" &rarr; 6328-26A-I-01)</div>
+      <div class="list-add-row">
+        <input class="list-add-code" id="newSubCode" placeholder="I" maxlength="3" />
+        <input class="list-add-input" id="newSubName" placeholder="Intake" />
+        <button class="list-add-btn" onclick="addItem('subsystems',true)">+ Add</button>
+      </div>
+      <div class="list-manager" id="list-subsystems"><div class="list-empty">Loading...</div></div>
+    </div>
+    <div class="tab-pane" id="tab-machines">
+      <div class="s-section">Machines</div>
+      <div class="list-add-row">
+        <input class="list-add-input" id="newMachineName" placeholder="CNC Router" style="flex:1" />
+        <button class="list-add-btn" onclick="addItem('machines',false)">+ Add</button>
+      </div>
+      <div class="list-manager" id="list-machines"><div class="list-empty">Loading...</div></div>
+    </div>
+    <div class="tab-pane" id="tab-versions">
+      <div class="s-section">Robot Versions</div>
+      <div class="s-desc">Code (e.g. "C") is used in the part number when this robot is selected.</div>
+      <div class="list-add-row">
+        <input class="list-add-code" id="newVersionCode" placeholder="C" maxlength="2" />
+        <input class="list-add-input" id="newVersionName" placeholder="Comp Bot" />
+        <button class="list-add-btn" onclick="addItem('robot_versions',true)">+ Add</button>
+      </div>
+      <div class="list-manager" id="list-robot_versions"><div class="list-empty">Loading...</div></div>
+    </div>
+    <div class="tab-pane" id="tab-filaments">
+      <div class="s-section">Filaments</div>
+      <div class="list-add-row">
+        <input class="list-add-input" id="newFilamentName" placeholder="PLA+" style="flex:1" />
+        <button class="list-add-btn" onclick="addItem('filaments',false)">+ Add</button>
+      </div>
+      <div class="list-manager" id="list-filaments"><div class="list-empty">Loading...</div></div>
+    </div>
+    <div class="tab-pane" id="tab-branding">
+      <div class="s-section">Identity</div>
+      <div><div class="s-label">Team Name</div><input class="s-input" id="cfgTeam" placeholder="FRC 6328" oninput="document.getElementById('hTeam').textContent=this.value||'FRC'" /></div>
+      <div><div class="s-label">App Title</div><input class="s-input" id="cfgTitleInput" placeholder="MFG Pipeline" oninput="document.getElementById('hTitle').textContent=this.value||'MFG Pipeline'" /></div>
+      <div class="divider"></div>
+      <div class="s-section">Logo</div>
+      <div class="s-desc">PNG or SVG. Stored locally in your browser.</div>
+      <div class="logo-drop" onclick="document.getElementById('logoFile').click()">
+        <img class="logo-prev" id="logoPrev" alt="" />
+        <div class="logo-hint" id="logoHint">Click to upload logo</div>
+        <input type="file" id="logoFile" accept="image/*" style="display:none" onchange="handleLogo(event)" />
+      </div>
+      <button class="btn-back" style="font-size:12px;padding:6px 12px;width:fit-content;margin-top:4px" onclick="clearLogo()">Remove Logo</button>
+      <div class="divider"></div>
+      <div class="s-section">Part Colors</div>
+      <div class="s-desc">Colors your team uses for parts in Onshape. Applied when a ticket is submitted.</div>
+      <div class="list-add-row">
+        <div style="position:relative;flex-shrink:0;">
+          <div style="width:38px;height:38px;border-radius:6px;border:1px solid var(--border);overflow:hidden;position:relative;cursor:pointer;">
+            <div id="colorPickerPreview" style="position:absolute;inset:0;background:#888;border-radius:5px;pointer-events:none;"></div>
+            <input type="color" id="newColorHex" value="#888888" style="position:absolute;inset:-4px;width:calc(100% + 8px);height:calc(100% + 8px);border:none;cursor:pointer;opacity:0;" oninput="document.getElementById('colorPickerPreview').style.background=this.value;document.getElementById('newColorHexText').value=this.value;" />
+          </div>
+        </div>
+        <input class="list-add-input" id="newColorHexText" placeholder="#888888" maxlength="7" style="width:80px;flex:0 0 80px;font-family:monospace;" oninput="if(/^#[0-9a-fA-F]{6}$/.test(this.value)){document.getElementById('newColorHex').value=this.value;document.getElementById('colorPickerPreview').style.background=this.value;}" />
+        <input class="list-add-input" id="newColorName" placeholder="Black" style="flex:1" />
+        <button class="list-add-btn" onclick="addItem('colors',false,'newColorName','newColorHex')">+ Add</button>
+      </div>
+      <div class="list-manager" id="list-colors"><div class="list-empty">Loading...</div></div>
+    </div>
+    <div class="tab-pane" id="tab-appearance">
+      <div class="s-section">Color Mode</div>
+      <div class="mode-grid">
+        <div class="mode-card active" id="mc-dark" onclick="selectMode('dark')"><div class="mode-preview"><div class="mpv-hd" style="background:#111"></div><div class="mpv-body" style="background:#000"><div class="mpv-card" style="background:#1e1e1e"></div><div class="mpv-card" style="background:#1e1e1e"></div></div></div><div class="mode-name">Dark</div><div class="mode-check" id="chk-dark">&#10003;</div></div>
+        <div class="mode-card" id="mc-light" onclick="selectMode('light')"><div class="mode-preview"><div class="mpv-hd" style="background:#e0e0e0"></div><div class="mpv-body" style="background:#fff"><div class="mpv-card" style="background:#f0f0f0"></div><div class="mpv-card" style="background:#f0f0f0"></div></div></div><div class="mode-name">Light</div><div class="mode-check" id="chk-light"></div></div>
+        <div class="mode-card" id="mc-custom" onclick="selectMode('custom')"><div class="mode-preview"><div class="mpv-hd" id="cpvHd" style="background:#162236"></div><div class="mpv-body" id="cpvBd" style="background:#0d1b2e"><div class="mpv-card" id="cpvC1" style="background:#1e2f45"></div><div class="mpv-card" id="cpvC2" style="background:#1e2f45"></div></div></div><div class="mode-name">Custom</div><div class="mode-check" id="chk-custom"></div></div>
+      </div>
+      <div class="custom-opts" id="customOpts">
+        <div class="color-row"><div class="color-swatch"><div class="cp" id="cp-bg"></div><input type="color" id="col-bg" oninput="setCustom('bg',this.value)" /></div><div class="color-info"><div class="color-lbl">Background</div><div class="color-sub">Main bg</div></div><input class="hex-in" id="hx-bg" maxlength="7" oninput="setCustomHex('bg',this.value)" /></div>
+        <div class="color-row"><div class="color-swatch"><div class="cp" id="cp-surf"></div><input type="color" id="col-surf" oninput="setCustom('surf',this.value)" /></div><div class="color-info"><div class="color-lbl">Secondary</div><div class="color-sub">Cards, header</div></div><input class="hex-in" id="hx-surf" maxlength="7" oninput="setCustomHex('surf',this.value)" /></div>
+        <div class="color-row"><div class="color-swatch"><div class="cp" id="cp-acc"></div><input type="color" id="col-acc" oninput="setCustom('acc',this.value)" /></div><div class="color-info"><div class="color-lbl">Accent</div><div class="color-sub">Buttons, labels</div></div><input class="hex-in" id="hx-acc" maxlength="7" oninput="setCustomHex('acc',this.value)" /></div>
+      </div>
+    </div>
+  </div>
+  <div class="save-bar">
+    <button class="btn-back" onclick="backFromSettings()">Back</button>
+    <button class="btn-save" onclick="saveSettings()">SAVE</button>
+  </div>
+</div>
+
+<!-- MAIN FORM -->
+<div class="screen" id="mainScreen">
+  <div class="form-body">
+    <div>
+      <div class="field-label">Subsystem</div>
+      <div class="pill-group" id="subGroup"><span class="spinner-sm"></span></div>
+    </div>
+    <div class="pn-preview">
+      <div>
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Generated Part Number</div>
+        <div class="pn-value" id="pnDisplay">&#8212;</div>
+      </div>
+      <div class="pn-status" id="pnStatus"></div>
+    </div>
+    <div>
+      <div class="field-label">Part Name</div>
+      <input class="field-input" id="partNameInput" placeholder="e.g. Intake Side Plate" />
+    </div>
+    <div>
+      <div class="field-label">Machine</div>
+      <div class="pill-group" id="machineGroup"><span class="spinner-sm"></span></div>
+    </div>
+    <div>
+      <div class="field-label">Robot Version</div>
+      <div class="pill-group" id="versionGroup"><span class="spinner-sm"></span></div>
+    </div>
+    <div>
+      <div class="field-label">Material</div>
+      <div class="mat-section">
+        <div class="mat-hd" onclick="toggleMat('sheet')">
+          <div class="mat-hd-title">Sheet / Plate <span class="mat-badge" id="badge-sheet"></span></div>
+          <span class="mat-arrow" id="arrow-sheet">&#9660;</span>
+        </div>
+        <div class="mat-body" id="mbody-sheet">
+          <div>
+            <div class="field-sublabel">Material</div>
+            <div class="pill-group" id="sheetMat">
+              <div class="pill" onclick="selSheet(this,'Aluminum')">Aluminum</div>
+              <div class="pill" onclick="selSheet(this,'Polycarb Clear')">Polycarb Clear</div>
+              <div class="pill" onclick="selSheet(this,'Polycarb Smoked')">Polycarb Smoked</div>
+              <div class="pill" onclick="selSheet(this,'Wood')">Wood</div>
+            </div>
+          </div>
+          <div id="sheetThickWrap" style="display:none">
+            <div class="field-sublabel">Thickness</div>
+            <div class="thickness-pills" id="sheetThick">
+              <div class="t-pill" onclick="selSheetThick(this)">.063"</div>
+              <div class="t-pill" onclick="selSheetThick(this)">.125"</div>
+              <div class="t-pill" onclick="selSheetThick(this)">.25"</div>
+              <div class="t-pill" onclick="selSheetThick(this)">.375"</div>
+              <div class="t-pill" onclick="selSheetThick(this)">.5"</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mat-section">
+        <div class="mat-hd" onclick="toggleMat('tube')">
+          <div class="mat-hd-title">Aluminum Tube <span class="mat-badge" id="badge-tube"></span></div>
+          <span class="mat-arrow" id="arrow-tube">&#9660;</span>
+        </div>
+        <div class="mat-body" id="mbody-tube">
+          <div>
+            <div class="field-sublabel">Size</div>
+            <div class="pill-group" id="tubeSize">
+              <div class="pill" onclick="selTubeSize(this,'1x1 Square')">1" x 1"</div>
+              <div class="pill" onclick="selTubeSize(this,'1.5x1.5 Square')">1.5" x 1.5"</div>
+              <div class="pill" onclick="selTubeSize(this,'2x2 Square')">2" x 2"</div>
+              <div class="pill" onclick="selTubeSize(this,'2.5x2.5 Square')">2.5" x 2.5"</div>
+              <div class="pill" onclick="selTubeSize(this,'3x3 Square')">3" x 3"</div>
+              <div class="pill" onclick="selTubeSize(this,'2x1 Rectangular')">2" x 1"</div>
+            </div>
+          </div>
+          <div id="tubeWallWrap" style="display:none">
+            <div class="field-sublabel">Wall Thickness</div>
+            <div class="thickness-pills" id="tubeWall"></div>
+          </div>
+        </div>
+      </div>
+      <div class="mat-section">
+        <div class="mat-hd" onclick="toggleMat('hex')">
+          <div class="mat-hd-title">Hex Stock <span class="mat-badge" id="badge-hex"></span></div>
+          <span class="mat-arrow" id="arrow-hex">&#9660;</span>
+        </div>
+        <div class="mat-body" id="mbody-hex">
+          <div class="thickness-pills">
+            <div class="t-pill" onclick="selStock(this,'hex','Hex Stock 0.375&quot; AF')">0.375" AF</div>
+            <div class="t-pill" onclick="selStock(this,'hex','Hex Stock 0.500&quot; AF')">0.500" AF</div>
+            <div class="t-pill" onclick="selStock(this,'hex','Hex Stock 0.505&quot; AF (oversized)')">0.505" AF (oversized)</div>
+            <div class="t-pill" onclick="selStock(this,'hex','Hex Stock 0.500&quot; ID x 0.750&quot; OD')">0.500" ID x 0.750" OD</div>
+          </div>
+        </div>
+      </div>
+      <div class="mat-section">
+        <div class="mat-hd" onclick="toggleMat('rhex')">
+          <div class="mat-hd-title">Rounded Hex <span class="mat-badge" id="badge-rhex"></span></div>
+          <span class="mat-arrow" id="arrow-rhex">&#9660;</span>
+        </div>
+        <div class="mat-body" id="mbody-rhex">
+          <div class="thickness-pills">
+            <div class="t-pill" onclick="selStock(this,'rhex','Rounded Hex 0.375&quot; OD x 0.159&quot; ID')">0.375" OD x 0.159" ID</div>
+            <div class="t-pill" onclick="selStock(this,'rhex','Rounded Hex 0.500&quot; OD x 0.159&quot; ID')">0.500" OD x 0.159" ID</div>
+            <div class="t-pill" onclick="selStock(this,'rhex','Rounded Hex 0.500&quot; OD x 0.314&quot; ID')">0.500" OD x 0.314" ID</div>
+          </div>
+        </div>
+      </div>
+      <div class="mat-section">
+        <div class="mat-hd" onclick="toggleMat('hexlite')">
+          <div class="mat-hd-title">Hex Lite <span class="mat-badge" id="badge-hexlite"></span></div>
+          <span class="mat-arrow" id="arrow-hexlite">&#9660;</span>
+        </div>
+        <div class="mat-body" id="mbody-hexlite">
+          <div class="thickness-pills">
+            <div class="t-pill" onclick="selStock(this,'hexlite','Hex Lite 0.375&quot; AF')">0.375" AF</div>
+            <div class="t-pill" onclick="selStock(this,'hexlite','Hex Lite 0.500&quot; AF')">0.500" AF</div>
+          </div>
+        </div>
+      </div>
+      <div class="mat-section">
+        <div class="mat-hd" onclick="toggleMat('tuberound')">
+          <div class="mat-hd-title">Tube Stock (Round) <span class="mat-badge" id="badge-tuberound"></span></div>
+          <span class="mat-arrow" id="arrow-tuberound">&#9660;</span>
+        </div>
+        <div class="mat-body" id="mbody-tuberound">
+          <div class="thickness-pills">
+            <div class="t-pill" onclick="selStock(this,'tuberound','Round Tube 0.375&quot; OD x 0.196&quot; ID')">0.375" OD x 0.196" ID</div>
+            <div class="t-pill" onclick="selStock(this,'tuberound','Round Tube 0.500&quot; OD x 0.196&quot; ID')">0.500" OD x 0.196" ID</div>
+          </div>
+        </div>
+      </div>
+      <div class="mat-section">
+        <div class="mat-hd" onclick="toggleMat('spline')">
+          <div class="mat-hd-title">Spline Stock <span class="mat-badge" id="badge-spline"></span></div>
+          <span class="mat-arrow" id="arrow-spline">&#9660;</span>
+        </div>
+        <div class="mat-body" id="mbody-spline">
+          <div class="thickness-pills">
+            <div class="t-pill" onclick="selStock(this,'spline','SplineXS 8mm OD')">SplineXS - 8mm OD</div>
+            <div class="t-pill" onclick="selStock(this,'spline','SplineXL Tube 1.000&quot; Spline ID')">SplineXL - 1.000" ID</div>
+          </div>
+        </div>
+      </div>
+      <div class="mat-section">
+        <div class="mat-hd" onclick="toggleMat('otherstock')">
+          <div class="mat-hd-title">Other Stock <span class="mat-badge" id="badge-otherstock"></span></div>
+          <span class="mat-arrow" id="arrow-otherstock">&#9660;</span>
+        </div>
+        <div class="mat-body" id="mbody-otherstock">
+          <div class="thickness-pills">
+            <div class="t-pill" onclick="selStock(this,'otherstock','Churro')">Churro</div>
+            <div class="t-pill" onclick="selStock(this,'otherstock','Thunderhex')">Thunderhex</div>
+          </div>
+        </div>
+      </div>
+      <div class="mat-summary" id="matSummary">
+        <div class="mat-summary-label">Selected Material</div>
+        <div class="mat-summary-value" id="matSummaryVal"></div>
+      </div>
+    </div>
+    <div class="row-2">
+      <div><div class="field-label">Quantity</div><input class="field-input" id="qty" type="number" min="1" value="1" /></div>
+      <div><div class="field-label">Assigned To</div><input class="field-input" id="assignedTo" placeholder="Name..." /></div>
+    </div>
+    <div>
+      <div class="field-label">File Attachment</div>
+      <div class="file-drop">
+        <div class="file-drop-text">Drop a <span>DXF or STEP</span> file here, or click to browse</div>
+        <input type="file" id="fileInput" accept=".dxf,.step,.stp,.DXF,.STEP,.STP" onchange="handleFile(event)" />
+      </div>
+      <div class="file-info" id="fileInfo"></div>
+      <button class="file-clear" id="fileClear" onclick="clearFile()">Remove file</button>
+    </div>
+    <div>
+      <div class="field-label">Part Color</div>
+      <div class="s-desc" style="margin-bottom:10px;font-size:12px;">Applied to the part in Onshape on submit.</div>
+      <div class="pill-group" id="colorSwatches"><span class="spinner-sm"></span></div>
+    </div>
+    <div>
+      <div class="field-label">Notes</div>
+      <textarea class="field-input" id="notes" placeholder="Special instructions, stock info..."></textarea>
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <button class="btn-secondary" onclick="clearForm()">Clear</button>
+    <button class="btn-primary" id="submitBtn" onclick="submitCard()"><span>Submit</span></button>
+  </div>
+</div>
+
+<!-- 3D PRINT SCREEN -->
+<div class="screen" id="printScreen">
+  <div class="form-body">
+    <div class="print-header">
+      <div class="print-title">3D Print Request</div>
+      <div class="print-sub">Fill in the details for this print job</div>
+    </div>
+    <div><div class="field-label">Subsystem</div><div class="pill-group" id="printSubGroup"></div></div>
+    <div class="pn-preview">
+      <div>
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Generated Part Number</div>
+        <div class="pn-value" id="printPnDisplay">&#8212;</div>
+      </div>
+      <div class="pn-status" id="printPnStatus"></div>
+    </div>
+    <div><div class="field-label">Part Name</div><input class="field-input" id="printPartName" placeholder="e.g. Intake Bracket" /></div>
+    <div><div class="field-label">Robot Version</div><div class="pill-group" id="printVersionGroup"></div></div>
+    <div><div class="field-label">Filament</div><select class="field-select" id="printFilament"><option value="">Select filament...</option></select></div>
+    <div>
+      <div class="field-label">Infill / Wall Details</div>
+      <input class="field-input" id="printInfill" placeholder="2 wall, 15% infill" />
+      <div style="font-size:12px;color:var(--muted);margin-top:5px">Standard: 2 wall, 15% infill</div>
+    </div>
+    <div><div class="field-label">Quantity</div><input class="field-input" id="printQty" type="number" min="1" value="1" style="width:120px" /></div>
+    <div>
+      <div class="field-label">Part File</div>
+      <div class="file-drop">
+        <div class="file-drop-text">Drop a <span>STEP or STL</span> file here, or click to browse</div>
+        <input type="file" id="printFileInput" accept=".step,.stp,.stl,.STEP,.STP,.STL" onchange="handlePrintFile(event)" />
+      </div>
+      <div class="file-info" id="printFileInfo"></div>
+      <button class="file-clear" id="printFileClear" onclick="clearPrintFile()">Remove file</button>
+    </div>
+    <div><div class="field-label">Notes</div><textarea class="field-input" id="printNotes" placeholder="Additional instructions..."></textarea></div>
+  </div>
+  <div class="bottom-bar">
+    <button class="btn-secondary" onclick="showScreen('main')">Back</button>
+    <button class="btn-primary" id="printSubmitBtn" onclick="submitPrintCard()"><span>Submit Print</span></button>
+  </div>
+</div>
+
+<script>
+const THEMES={dark:{'--bg':'#000','--surf':'#111','--surf2':'#1e1e1e','--acc':'#888','--text':'#fff','--muted':'#666','--border':'#2a2a2a'},light:{'--bg':'#fff','--surf':'#f0f0f0','--surf2':'#e4e4e4','--acc':'#555','--text':'#000','--muted':'#888','--border':'#d0d0d0'}};
+let mode='dark',custom={bg:'#0d1b2e',surf:'#162236',acc:'#f5a623'},activeLogo=null;
+function applyTheme(){const r=document.documentElement;if(mode!=='custom'){Object.entries(THEMES[mode]).forEach(([k,v])=>r.style.setProperty(k,v));}else{const lum=hexLum(custom.bg),dark=lum<0.4;r.style.setProperty('--bg',custom.bg);r.style.setProperty('--surf',custom.surf);r.style.setProperty('--surf2',blend(custom.bg,custom.surf,0.5));r.style.setProperty('--acc',custom.acc);r.style.setProperty('--text',dark?'#fff':'#000');r.style.setProperty('--muted',dark?'#888':'#777');r.style.setProperty('--border',dark?blend(custom.bg,'#fff',0.12):blend(custom.bg,'#000',0.12));}}
+function hexLum(h){const r=parseInt(h.slice(1,3),16)/255,g=parseInt(h.slice(3,5),16)/255,b=parseInt(h.slice(5,7),16)/255;return 0.2126*r+0.7152*g+0.0722*b;}
+function blend(h1,h2,t){const p=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];const[r1,g1,b1]=p(h1),[r2,g2,b2]=p(h2);return'#'+[r1+(r2-r1)*t,g1+(g2-g1)*t,b1+(b2-b1)*t].map(x=>Math.round(x).toString(16).padStart(2,'0')).join('');}
+function selectMode(m){mode=m;['dark','light','custom'].forEach(n=>{document.getElementById('mc-'+n).classList.toggle('active',n===m);document.getElementById('chk-'+n).textContent=n===m?'\u2713':'';});document.getElementById('customOpts').classList.toggle('visible',m==='custom');applyTheme();}
+function syncCustomUI(){['bg','surf','acc'].forEach(k=>{document.getElementById('cp-'+k).style.background=custom[k];document.getElementById('col-'+k).value=custom[k];document.getElementById('hx-'+k).value=custom[k];});updateCPV();}
+function setCustom(k,v){custom[k]=v;document.getElementById('cp-'+k).style.background=v;document.getElementById('hx-'+k).value=v;applyTheme();updateCPV();}
+function setCustomHex(k,v){if(!/^#[0-9a-fA-F]{6}$/.test(v))return;custom[k]=v;document.getElementById('cp-'+k).style.background=v;document.getElementById('col-'+k).value=v;applyTheme();updateCPV();}
+function updateCPV(){document.getElementById('cpvHd').style.background=custom.surf;document.getElementById('cpvBd').style.background=custom.bg;const c=blend(custom.bg,custom.surf,0.6);document.getElementById('cpvC1').style.background=c;document.getElementById('cpvC2').style.background=c;}
+function handleLogo(e){const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{activeLogo=ev.target.result;document.getElementById('logoPrev').src=activeLogo;document.getElementById('logoPrev').style.display='block';document.getElementById('logoHint').textContent=file.name;applyLogo();};r.readAsDataURL(file);}
+function applyLogo(){const img=document.getElementById('hLogoImg'),ph=document.getElementById('hLogoPh');if(activeLogo){img.src=activeLogo;img.style.display='block';ph.style.display='none';}else{img.style.display='none';ph.style.display='flex';}}
+function clearLogo(){activeLogo=null;document.getElementById('logoPrev').style.display='none';document.getElementById('logoHint').textContent='Click to upload logo';document.getElementById('logoFile').value='';applyLogo();}
+let cfg={};
+function loadConfig(){try{cfg=JSON.parse(localStorage.getItem('mfg_cfg')||'{}');}catch(e){cfg={};}mode=cfg.mode||'dark';custom=cfg.custom||{bg:'#0d1b2e',surf:'#162236',acc:'#f5a623'};activeLogo=cfg.logo||null;applyTheme();applyLogo();document.getElementById('hTeam').textContent=cfg.team||'FRC';document.getElementById('hTitle').textContent=cfg.title||'MFG Pipeline';document.getElementById('hLogoPh').textContent=(cfg.teamNum||cfg.team||'?')[0];}
+function openSettings(){document.getElementById('cfgUrl').value=cfg.url||'';document.getElementById('cfgKey').value=cfg.key||'';document.getElementById('cfgTable').value=cfg.table||'mfg_pipeline';document.getElementById('cfgBucket').value=cfg.bucket||'mfg-files';document.getElementById('cfgTeamNum').value=cfg.teamNum||'';document.getElementById('cfgYear').value=cfg.year||'';document.getElementById('cfgTeam').value=cfg.team||'';document.getElementById('cfgTitleInput').value=cfg.title||'';if(activeLogo){document.getElementById('logoPrev').src=activeLogo;document.getElementById('logoPrev').style.display='block';document.getElementById('logoHint').textContent='Logo loaded';}selectMode(mode);syncCustomUI();updatePNPreview();}
+function updatePNPreview(){const t=document.getElementById('cfgTeamNum').value||'????',y=document.getElementById('cfgYear').value||'??';document.getElementById('pnExample').textContent=`${t}-${y}X-S-01`;}
+function saveSettings(){const url=document.getElementById('cfgUrl').value.trim(),key=document.getElementById('cfgKey').value.trim();if(!url||!key){showToast('URL and API key required',true);return;}cfg={url,key,table:document.getElementById('cfgTable').value.trim()||'mfg_pipeline',bucket:document.getElementById('cfgBucket').value.trim()||'mfg-files',teamNum:document.getElementById('cfgTeamNum').value.trim(),year:document.getElementById('cfgYear').value.trim(),team:document.getElementById('cfgTeam').value.trim(),title:document.getElementById('cfgTitleInput').value.trim(),mode,custom,logo:activeLogo};localStorage.setItem('mfg_cfg',JSON.stringify(cfg));document.getElementById('hTeam').textContent=cfg.team||'FRC';document.getElementById('hTitle').textContent=cfg.title||'MFG Pipeline';document.getElementById('hLogoPh').textContent=(cfg.teamNum||cfg.team||'?')[0];applyTheme();applyLogo();showToast('Saved');backFromSettings();}
+function backFromSettings(){if(cfg.url&&cfg.key)showScreen('main');else showToast('Complete Connection tab first',true);}
+function switchTab(name,btn){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));(btn||event.target).classList.add('active');document.getElementById('tab-'+name).classList.add('active');if(name==='subsystems')loadListManager('subsystems',true);else if(name==='machines')loadListManager('machines',false);else if(name==='versions')loadListManager('robot_versions',true);else if(name==='filaments')loadListManager('filaments',false);else if(name==='branding')loadListManager('colors',false);}
+function showScreen(s){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));document.getElementById(s+'Screen').classList.add('active');if(s==='settings')openSettings();}
+function sbH(x={}){return{'apikey':cfg.key,'Authorization':'Bearer '+cfg.key,'Content-Type':'application/json',...x};}
+function sbBase(){return cfg.url.replace(/\/$/,'')+'/rest/v1/';}
+async function sbGet(t,p=''){const r=await fetch(sbBase()+t+'?'+p,{headers:sbH({'Prefer':'return=representation'})});if(!r.ok)throw new Error((await r.json()).message||'Error');return r.json();}
+async function sbPost(t,d){const r=await fetch(sbBase()+t,{method:'POST',headers:sbH({'Prefer':'return=representation'}),body:JSON.stringify(d)});if(!r.ok)throw new Error((await r.json()).message||'Error');return r.json();}
+async function sbDelete(t,p){const r=await fetch(sbBase()+t+'?'+p,{method:'DELETE',headers:sbH()});if(!r.ok)throw new Error((await r.json()).message||'Error');}
+let selectedFile=null,selectedPrintFile=null;
+function handleFile(e){const f=e.target.files[0];if(!f)return;selectedFile=f;document.getElementById('fileInfo').textContent='Attached: '+f.name+' ('+fmtB(f.size)+')';document.getElementById('fileInfo').style.display='block';document.getElementById('fileClear').style.display='block';}
+function clearFile(){selectedFile=null;document.getElementById('fileInput').value='';document.getElementById('fileInfo').style.display='none';document.getElementById('fileClear').style.display='none';}
+function handlePrintFile(e){const f=e.target.files[0];if(!f)return;selectedPrintFile=f;document.getElementById('printFileInfo').textContent='Attached: '+f.name+' ('+fmtB(f.size)+')';document.getElementById('printFileInfo').style.display='block';document.getElementById('printFileClear').style.display='block';}
+function clearPrintFile(){selectedPrintFile=null;document.getElementById('printFileInput').value='';document.getElementById('printFileInfo').style.display='none';document.getElementById('printFileClear').style.display='none';}
+function fmtB(b){if(b<1024)return b+'B';if(b<1048576)return(b/1024).toFixed(1)+'KB';return(b/1048576).toFixed(1)+'MB';}
+async function uploadFile(file,pn){const ext=file.name.split('.').pop().toLowerCase();const path=pn+'.'+ext;const r=await fetch(`${cfg.url.replace(/\/$/,'')}/storage/v1/object/${cfg.bucket||'mfg-files'}/${path}`,{method:'POST',headers:{'apikey':cfg.key,'Authorization':'Bearer '+cfg.key,'Content-Type':'application/octet-stream','x-upsert':'true'},body:file});if(!r.ok){const e=await r.json();throw new Error(e.message||'Upload failed');}return`${cfg.url.replace(/\/$/,'')}/storage/v1/object/public/${cfg.bucket||'mfg-files'}/${path}`;}
+let lists={subsystems:[],machines:[],robot_versions:[],filaments:[],colors:[]};
+async function loadAll(){if(!cfg.url||!cfg.key)return;try{const[s,m,v,f,c]=await Promise.all([sbGet('subsystems','select=*&order=name.asc'),sbGet('machines','select=*&order=name.asc'),sbGet('robot_versions','select=*&order=name.asc'),sbGet('filaments','select=*&order=name.asc'),sbGet('colors','select=*&order=name.asc')]);lists.subsystems=s;lists.machines=m;lists.robot_versions=v;lists.filaments=f;lists.colors=c;renderSubPills();renderMachinePills();renderVersionPills();renderPrintSubPills();renderPrintVersionPills();renderFilamentSelect();renderColorSwatches();}catch(e){showToast('Failed to load data: '+e.message,true);}}
+function renderSubPills(){const g=document.getElementById('subGroup');if(!lists.subsystems.length){g.innerHTML='<span style="font-size:13px;color:var(--muted)">No subsystems — add in Settings</span>';return;}g.innerHTML='';lists.subsystems.forEach(s=>{const el=document.createElement('div');el.className='sub-pill';el.innerHTML=`${s.name} <span class="sub-code">${s.code}</span>`;el.onclick=()=>selectSub(el,s);g.appendChild(el);});}
+function renderMachinePills(){const g=document.getElementById('machineGroup');if(!lists.machines.length){g.innerHTML='<span style="font-size:13px;color:var(--muted)">No machines — add in Settings</span>';return;}g.innerHTML='';lists.machines.forEach(m=>{const el=document.createElement('div');el.className='pill';el.textContent=m.name;el.onclick=()=>{document.querySelectorAll('#machineGroup .pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');if(m.name==='3D Printer'){showScreen('print');renderPrintSubPills();renderPrintVersionPills();renderFilamentSelect();}};g.appendChild(el);});}
+function renderVersionPills(){const g=document.getElementById('versionGroup');if(!lists.robot_versions.length){g.innerHTML='<span style="font-size:13px;color:var(--muted)">No robot versions — add in Settings</span>';return;}g.innerHTML='';lists.robot_versions.forEach(v=>{const el=document.createElement('div');el.className='sub-pill';el.innerHTML=`${v.name} <span class="sub-code">${v.code||'?'}</span>`;el.onclick=()=>{document.querySelectorAll('#versionGroup .sub-pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');selectedVersion=v;refreshPN();};g.appendChild(el);});}
+function renderPrintSubPills(){const g=document.getElementById('printSubGroup');g.innerHTML='';lists.subsystems.forEach(s=>{const el=document.createElement('div');el.className='sub-pill';el.innerHTML=`${s.name} <span class="sub-code">${s.code}</span>`;el.onclick=()=>{document.querySelectorAll('#printSubGroup .sub-pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');selectedPrintSub=s;if(selectedPrintVersion)genPN(s.code,selectedPrintVersion.code,'printPnDisplay','printPnStatus');};g.appendChild(el);});}
+function renderPrintVersionPills(){const g=document.getElementById('printVersionGroup');g.innerHTML='';lists.robot_versions.forEach(v=>{const el=document.createElement('div');el.className='sub-pill';el.innerHTML=`${v.name} <span class="sub-code">${v.code||'?'}</span>`;el.onclick=()=>{document.querySelectorAll('#printVersionGroup .sub-pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');selectedPrintVersion=v;if(selectedPrintSub)genPN(selectedPrintSub.code,v.code,'printPnDisplay','printPnStatus');};g.appendChild(el);});}
+function renderFilamentSelect(){const sel=document.getElementById('printFilament');sel.innerHTML='<option value="">Select filament...</option>';lists.filaments.forEach(f=>{const o=document.createElement('option');o.value=f.name;o.textContent=f.name;sel.appendChild(o);});}
+let selectedColor=null;
+function renderColorSwatches(){const g=document.getElementById('colorSwatches');if(!lists.colors||!lists.colors.length){g.innerHTML='<span style="font-size:13px;color:var(--muted)">No colors — add in Settings &rarr; Brand</span>';return;}g.innerHTML='';lists.colors.forEach(c=>{const el=document.createElement('div');el.style.cssText=`display:inline-flex;align-items:center;gap:7px;background:var(--surf2);border:2px solid var(--border);color:var(--text);padding:5px 12px 5px 8px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;user-select:none;`;el.innerHTML=`<div style="width:16px;height:16px;border-radius:50%;background:${c.hex};flex-shrink:0;border:1px solid rgba(255,255,255,.15);"></div>${c.name}`;el.onclick=()=>{document.querySelectorAll('#colorSwatches > div').forEach(p=>{p.style.borderColor='var(--border)';p.style.background='var(--surf2)';});el.style.borderColor=c.hex;el.style.background=c.hex+'22';selectedColor=c;};g.appendChild(el);});}
+async function loadListManager(table,hasCode){if(!cfg.url||!cfg.key){document.getElementById('list-'+table).innerHTML='<div class="list-empty">Save connection settings first.</div>';return;}try{const rows=await sbGet(table,'select=*&order=name.asc');lists[table]=rows;renderListManager(table,hasCode);}catch(e){document.getElementById('list-'+table).innerHTML=`<div class="list-empty" style="color:var(--red)">${e.message}</div>`;}}
+function renderListManager(table,hasCode){const el=document.getElementById('list-'+table);if(!lists[table]||!lists[table].length){el.innerHTML='<div class="list-empty">None yet.</div>';return;}el.innerHTML='';lists[table].forEach(r=>{const div=document.createElement('div');div.className='list-item';const colorSwatch=table==='colors'&&r.hex?`<div style="width:20px;height:20px;border-radius:4px;background:${r.hex};border:1px solid var(--border);flex-shrink:0;"></div>`:''  ;div.innerHTML=`${colorSwatch}${hasCode?`<div class="list-item-code">${r.code||'?'}</div>`:''}<div class="list-item-name">${r.name}${table==='colors'&&r.hex?` <span style="font-family:monospace;font-size:11px;color:var(--muted)">${r.hex}</span>`:''}</div><button class="list-item-del" onclick="delItem('${table}',${r.id},${hasCode})">&#215;</button>`;el.appendChild(div);});}
+async function addItem(table,hasCode,nameIdOverride,hexIdOverride){const nameId=nameIdOverride||(table==='subsystems'?'newSubName':table==='machines'?'newMachineName':table==='robot_versions'?'newVersionName':table==='colors'?'newColorName':'newFilamentName');const name=document.getElementById(nameId).value.trim();if(!name){showToast('Enter a name',true);return;}const data={name};if(hasCode){const codeId=table==='subsystems'?'newSubCode':'newVersionCode';const code=document.getElementById(codeId).value.trim().toUpperCase();if(!code){showToast('Enter a code',true);return;}data.code=code;}if(hexIdOverride){const hex=document.getElementById(hexIdOverride).value.trim();if(hex)data.hex=hex;}try{await sbPost(table,data);document.getElementById(nameId).value='';if(hasCode)document.getElementById(table==='subsystems'?'newSubCode':'newVersionCode').value='';if(hexIdOverride){document.getElementById(hexIdOverride).value='#888888';document.getElementById('colorPickerPreview').style.background='#888888';document.getElementById('newColorHexText').value='#888888';}await loadListManager(table,hasCode);await loadAll();showToast('Added');}catch(e){showToast('Error: '+e.message,true);}}
+async function delItem(table,id,hasCode){if(!confirm('Delete?'))return;try{await sbDelete(table,'id=eq.'+id);await loadListManager(table,hasCode);await loadAll();}catch(e){showToast('Error: '+e.message,true);}}
+let selectedSub=null,selectedVersion=null,selectedPrintSub=null,selectedPrintVersion=null;
+async function selectSub(el,sub){selectedSub=sub;document.querySelectorAll('#subGroup .sub-pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');await refreshPN();}
+async function refreshPN(){if(!selectedSub){document.getElementById('pnDisplay').textContent='\u2014';return;}await genPN(selectedSub.code,selectedVersion?.code||null,'pnDisplay','pnStatus');}
+async function genPN(subCode,verCode,dispId,statId){const{teamNum,year}=cfg;if(!teamNum||!year){document.getElementById(dispId).textContent='Set season in Settings';return;}const botPart=verCode?`${year}${verCode}`:year+'?';const prefix=`${teamNum}-${botPart}-${subCode}-`;try{const rows=await sbGet(cfg.table||'mfg_pipeline',`select=part_number&part_number=like.${encodeURIComponent(prefix+'%')}&order=part_number.desc&limit=1`);let next=1;if(rows.length&&rows[0].part_number){const n=parseInt(rows[0].part_number.split('-').pop());if(!isNaN(n))next=n+1;}document.getElementById(dispId).textContent=prefix+String(next).padStart(2,'0');document.getElementById(statId).textContent='Next available';}catch(e){document.getElementById(dispId).textContent='Error';}}
+let matState={section:null,value:null};
+const TUBE_WALLS={'1x1 Square':['.062"','.093"','.125"'],'1.5x1.5 Square':['.062"','.125"'],'2x2 Square':['.062"','.09375"','.125"'],'2.5x2.5 Square':['.125"'],'3x3 Square':['.125"'],'2x1 Rectangular':['.062"','.093"','.125"']};
+function toggleMat(id){const body=document.getElementById('mbody-'+id),arrow=document.getElementById('arrow-'+id),hd=body.previousElementSibling,isOpen=body.classList.contains('open');document.querySelectorAll('.mat-body').forEach(b=>b.classList.remove('open'));document.querySelectorAll('.mat-hd').forEach(h=>h.classList.remove('open'));document.querySelectorAll('[id^="arrow-"]').forEach(a=>a.style.transform='');if(!isOpen){body.classList.add('open');hd.classList.add('open');arrow.style.transform='rotate(180deg)';}}
+function clearMat(){matState={section:null,value:null};document.querySelectorAll('.mat-badge').forEach(b=>{b.style.display='none';b.textContent='';});document.getElementById('matSummary').style.display='none';}
+function setMat(sec,val){matState={section:sec,value:val};const b=document.getElementById('badge-'+sec);if(b){b.textContent=val;b.style.display='inline';}document.getElementById('matSummaryVal').textContent=val;document.getElementById('matSummary').style.display='block';}
+function selSheet(el,mat){clearMat();document.querySelectorAll('#sheetMat .pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');document.getElementById('sheetThickWrap').style.display='block';document.querySelectorAll('#sheetThick .t-pill').forEach(p=>p.classList.remove('active'));setMat('sheet',mat+' (select thickness)');}
+function selSheetThick(el){document.querySelectorAll('#sheetThick .t-pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');const mat=document.querySelector('#sheetMat .pill.active');if(mat)setMat('sheet',mat.textContent.trim()+' - '+el.textContent.trim());}
+function selTubeSize(el,size){document.querySelectorAll('#tubeSize .pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');const walls=TUBE_WALLS[size]||[];const wg=document.getElementById('tubeWall');wg.innerHTML='';walls.forEach(w=>{const t=document.createElement('div');t.className='t-pill';t.textContent=w;t.onclick=function(){document.querySelectorAll('#tubeWall .t-pill').forEach(p=>p.classList.remove('active'));this.classList.add('active');setMat('tube','Aluminum Tube '+el.textContent.trim()+' - Wall '+w);};wg.appendChild(t);});document.getElementById('tubeWallWrap').style.display='block';if(matState.section!=='tube')clearMat();setMat('tube','Aluminum Tube '+el.textContent.trim()+' (select wall)');}
+function selStock(el,section,val){document.querySelectorAll('.mat-body .t-pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');clearMat();setMat(section,val);}
+function getMaterial(){return matState.value&&!matState.value.includes('(select')?matState.value:'';}
+async function submitCard(){const pn=document.getElementById('pnDisplay').textContent,partName=document.getElementById('partNameInput').value.trim(),machine=document.querySelector('#machineGroup .pill.active')?.textContent||'',material=getMaterial(),verEl=document.querySelector('#versionGroup .sub-pill.active');if(!selectedSub){showToast('Select a subsystem',true);return;}if(!partName){showToast('Enter a part name',true);return;}if(!machine){showToast('Select a machine',true);return;}if(!material){showToast('Select a material',true);return;}if(!verEl){showToast('Select a robot version',true);return;}if(pn.includes('?')||pn==='—'){showToast('Part number not ready',true);return;}const btn=document.getElementById('submitBtn');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';try{let fileUrl='';if(selectedFile)fileUrl=await uploadFile(selectedFile,pn);const verName=verEl.childNodes[0].textContent.trim();const record={part_name:partName,part_number:pn,machine,material,robot_version:verName,quantity:parseInt(document.getElementById('qty').value)||1,assigned_to:document.getElementById('assignedTo').value.trim(),notes:document.getElementById('notes').value.trim(),status:'Backlog'};if(fileUrl)record.file_url=fileUrl;await sbPost(cfg.table||'mfg_pipeline',record);
+// Write back to Onshape if we have context
+if(onshapeCtx&&onshapeCtx.partId){try{await fetch('/api/part-writeback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({documentId:onshapeCtx.documentId,workspaceId:onshapeCtx.workspaceId,elementId:onshapeCtx.elementId,partId:onshapeCtx.partId,partNumber:pn,colorHex:selectedColor?.hex||null})});}catch(e){console.warn('Writeback failed:',e.message);}}
+showToast('Submitted: '+pn);clearForm();}catch(e){showToast('Error: '+e.message,true);}finally{btn.disabled=false;btn.innerHTML='<span>Submit</span>';}}
+async function submitPrintCard(){const pn=document.getElementById('printPnDisplay').textContent,partName=document.getElementById('printPartName').value.trim();if(!selectedPrintSub){showToast('Select a subsystem',true);return;}if(!partName){showToast('Enter a part name',true);return;}const btn=document.getElementById('printSubmitBtn');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>';try{let fileUrl='';if(selectedPrintFile)fileUrl=await uploadFile(selectedPrintFile,pn);const verEl=document.querySelector('#printVersionGroup .sub-pill.active');const verName=verEl?verEl.childNodes[0].textContent.trim():'';const record={part_name:partName,part_number:pn,machine:'3D Printer',material:'N/A',robot_version:verName,quantity:parseInt(document.getElementById('printQty').value)||1,filament:document.getElementById('printFilament').value,infill_details:document.getElementById('printInfill').value.trim(),notes:document.getElementById('printNotes').value.trim(),status:'Backlog'};if(fileUrl)record.file_url=fileUrl;await sbPost(cfg.table||'mfg_pipeline',record);showToast('Print submitted: '+pn);clearPrintForm();showScreen('main');}catch(e){showToast('Error: '+e.message,true);}finally{btn.disabled=false;btn.innerHTML='<span>Submit Print</span>';}}
+function clearForm(){document.getElementById('partNameInput').value='';document.getElementById('qty').value=1;document.getElementById('assignedTo').value='';document.getElementById('notes').value='';clearFile();clearMat();document.querySelectorAll('#machineGroup .pill,#versionGroup .sub-pill,#subGroup .sub-pill').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.mat-body').forEach(b=>b.classList.remove('open'));document.querySelectorAll('.mat-hd').forEach(h=>h.classList.remove('open'));document.querySelectorAll('[id^="arrow-"]').forEach(a=>a.style.transform='');document.getElementById('sheetThickWrap').style.display='none';document.getElementById('tubeWallWrap').style.display='none';selectedSub=null;selectedVersion=null;selectedColor=null;document.querySelectorAll('#colorSwatches > div').forEach(p=>{p.style.borderColor='var(--border)';p.style.background='var(--surf2)';});document.getElementById('pnDisplay').textContent='—';document.getElementById('pnStatus').textContent='';}
+function clearPrintForm(){document.getElementById('printPartName').value='';document.getElementById('printQty').value=1;document.getElementById('printInfill').value='';document.getElementById('printNotes').value='';document.getElementById('printFilament').value='';clearPrintFile();document.querySelectorAll('#printSubGroup .sub-pill,#printVersionGroup .sub-pill').forEach(p=>p.classList.remove('active'));selectedPrintSub=null;selectedPrintVersion=null;document.getElementById('printPnDisplay').textContent='\u2014';}
+let toastT;
+function showToast(msg,err=false){const t=document.getElementById('toast');t.textContent=msg;t.className='toast'+(err?' error':'')+' show';clearTimeout(toastT);toastT=setTimeout(()=>t.className='toast'+(err?' error':''),3500);}
+
+// ONSHAPE INTEGRATION
+let onshapeCtx=null;
+function getOnshapeContext(){const p=new URLSearchParams(window.location.search);const did=p.get('documentId');const wid=p.get('workspaceOrVersionId')||p.get('workspaceId');const eid=p.get('elementId');if(did&&wid&&eid)return{documentId:did,workspaceId:wid,elementId:eid};return null;}
+async function checkOnshapeSession(){try{const r=await fetch('/api/session');const d=await r.json();if(!d.loggedIn){showLoginBanner(d.loginUrl);return false;}hideLoginBanner();return true;}catch(e){return true;}}
+function showLoginBanner(loginUrl){let b=document.getElementById('loginBanner');if(b)return;b=document.createElement('div');b.id='loginBanner';b.style.cssText='background:var(--surf2);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;';b.innerHTML=`<div style="font-size:13px;color:var(--muted)">Sign in to auto-detect parts from Onshape</div><a href="${loginUrl}" style="background:var(--acc);color:var(--bg);padding:7px 14px;border-radius:7px;font-family:Rajdhani,sans-serif;font-weight:700;font-size:13px;text-decoration:none;white-space:nowrap;">Sign In</a>`;document.querySelector('.header').after(b);}
+function hideLoginBanner(){const b=document.getElementById('loginBanner');if(b)b.remove();}
+async function loadOnshapeParts(){if(!onshapeCtx)return;try{const{documentId,workspaceId,elementId}=onshapeCtx;const r=await fetch(`/api/parts?documentId=${documentId}&workspaceId=${workspaceId}&elementId=${elementId}`);const d=await r.json();if(!r.ok||!d.parts||!d.parts.length)return;if(d.parts.length===1){autoFillPart(d.parts[0]);}else{showPartPicker(d.parts);}}catch(e){console.warn('Could not load Onshape parts:',e.message);}}
+function autoFillPart(part){
+  if(part.name)document.getElementById('partNameInput').value=part.name;
+  // Store partId for writeback
+  if(onshapeCtx)onshapeCtx.partId=part.partId;
+  // Auto-match material from Onshape
+  if(part.material){
+    const mat=part.material.toLowerCase();
+    // Try sheet materials first
+    let matched=false;
+    document.querySelectorAll('#sheetMat .pill').forEach(p=>{
+      if(!matched&&mat.includes(p.textContent.toLowerCase().trim())){p.click();matched=true;}
+    });
+    // Try stock materials
+    if(!matched){
+      document.querySelectorAll('.mat-body .t-pill').forEach(p=>{
+        if(!matched&&p.textContent.toLowerCase().includes(mat)){p.click();matched=true;}
+      });
+    }
+  }
+  showToast('Auto-filled from Onshape: '+part.name);
+}
+function showPartPicker(parts){let pk=document.getElementById('partPicker');if(pk)pk.remove();pk=document.createElement('div');pk.id='partPicker';pk.style.cssText='background:var(--surf2);border-bottom:1px solid var(--border);padding:12px 16px;';pk.innerHTML=`<div style="font-size:12px;color:var(--acc);font-family:Rajdhani,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">Select Part from Onshape</div><div style="display:flex;flex-direction:column;gap:6px;" id="partPickerList"></div>`;document.querySelector('.header').after(pk);const list=document.getElementById('partPickerList');parts.forEach(part=>{const btn=document.createElement('button');btn.style.cssText='background:var(--surf);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;text-align:left;cursor:pointer;font-size:13px;transition:border-color .15s;width:100%;';btn.innerHTML=`<strong style="font-family:Rajdhani,sans-serif;font-size:14px;">${part.name}</strong>${part.partNumber?` <span style="color:var(--muted);font-size:11px;">${part.partNumber}</span>`:''}`;btn.onmouseover=()=>btn.style.borderColor='var(--acc)';btn.onmouseout=()=>btn.style.borderColor='var(--border)';btn.onclick=()=>{autoFillPart(part);pk.remove();};list.appendChild(btn);});}
+
+(function(){
+  loadConfig();
+  onshapeCtx=getOnshapeContext();
+  if(cfg.url&&cfg.key){
+    showScreen('main');
+    loadAll();
+    checkOnshapeSession().then(loggedIn=>{if(loggedIn&&onshapeCtx)loadOnshapeParts();});
+  }else showScreen('settings');
+})();
+</script>
+</body>
+</html>
