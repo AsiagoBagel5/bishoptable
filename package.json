@@ -1,0 +1,16 @@
+{
+  "name": "bishoptable",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.mjs",
+    "start": "NODE_ENV=production node server.mjs"
+  },
+  "dependencies": {
+    "cookie": "^0.7.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
